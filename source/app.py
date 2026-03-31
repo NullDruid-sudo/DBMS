@@ -1,3 +1,5 @@
-from flask import flask
-import sqlite3
-import tkinter
+import database
+import streamlit as st
+
+st.title("Voidlocker")
+st.write("Database initialized")   
