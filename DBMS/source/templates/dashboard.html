@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}DigiLocker — Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>👋 Welcome, {{ session.get('user_name', 'User') }}</h1>
+        <p>Here's an overview of your digital locker</p>
+    </div>
+    <a href="{{ url_for('documents') }}" class="btn btn-primary" id="uploadNewBtn">
+        📤 Upload Document
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📄</div>
+        <div class="stat-value">{{ stats.total_docs }}</div>
+        <div class="stat-label">Total Documents</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💾</div>
+        <div class="stat-value">{{ format_file_size(stats.total_size) }}</div>
+        <div class="stat-label">Storage Used</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🔗</div>
+        <div class="stat-value">{{ stats.shared_count }}</div>
+        <div class="stat-label">Active Shares</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📂</div>
+        <div class="stat-value">{{ stats.categories | length }}</div>
+        <div class="stat-label">Categories Used</div>
+    </div>
+</div>
+
+<!-- Dashboard Panels -->
+<div class="dashboard-grid">
+    <!-- Recent Activity -->
+    <div class="panel">
+        <div class="panel-header">
+            <h3>📋 Recent Activity</h3>
+        </div>
+        {% if activity %}
+        <div class="activity-list">
+            {% for item in activity %}
+            <div class="activity-item">
+                <div class="activity-dot {{ item.action | lower }}"></div>
+                <div class="activity-text">
+                    <div class="activity-action">{{ item.action }}</div>
+                    <div class="activity-detail">{{ item.detail }}</div>
+                </div>
+                <div class="activity-time">
+                    {{ item.timestamp.strftime('%b %d, %I:%M %p') if item.timestamp else '' }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 2rem 1rem;">
+            <div class="empty-icon">📭</div>
+            <h3>No activity yet</h3>
+            <p>Your recent actions will appear here</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Documents -->
+    <div class="panel">
+        <div class="panel-header">
+            <h3>📁 Recent Documents</h3>
+            {% if recent_docs %}
+            <a href="{{ url_for('documents') }}" class="btn btn-ghost btn-sm">View All</a>
+            {% endif %}
+        </div>
+        {% if recent_docs %}
+        <div class="activity-list">
+            {% for doc in recent_docs %}
+            <a href="{{ url_for('preview', doc_id=doc.doc_id) }}" class="recent-doc-item" style="text-decoration:none;color:inherit;">
+                <div class="doc-type-icon {% if doc.file_type in ['pdf'] %}pdf{% elif doc.file_type in ['png','jpg','jpeg','gif'] %}image{% elif doc.file_type in ['doc','docx'] %}doc{% elif doc.file_type in ['xls','xlsx','csv'] %}sheet{% else %}other{% endif %}">
+                    {% if doc.file_type == 'pdf' %}📕
+                    {% elif doc.file_type in ['png','jpg','jpeg','gif'] %}🖼️
+                    {% elif doc.file_type in ['doc','docx'] %}📘
+                    {% elif doc.file_type in ['xls','xlsx','csv'] %}📗
+                    {% else %}📄{% endif %}
+                </div>
+                <div class="doc-info">
+                    <div class="doc-name">{{ doc.file_name }}</div>
+                    <div class="doc-meta">{{ format_file_size(doc.file_size) }} · {{ doc.category }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 2rem 1rem;">
+            <div class="empty-icon">📂</div>
+            <h3>No documents yet</h3>
+            <p>Upload your first document to get started</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

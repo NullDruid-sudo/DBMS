@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}DigiLocker — Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>👤 My Profile</h1>
+        <p>View and update your personal information</p>
+    </div>
+</div>
+
+<div class="profile-layout">
+    <!-- Left: Avatar & Stats -->
+    <div class="panel">
+        <div class="profile-avatar-section">
+            <div class="profile-avatar-large">{{ user.name[0] | upper if user.name else 'U' }}</div>
+            <div class="profile-name">{{ user.name }}</div>
+            <div class="profile-email">{{ user.email }}</div>
+
+            <div class="profile-stats-mini">
+                <div class="profile-stat">
+                    <div class="profile-stat-value">{{ stats.total_docs }}</div>
+                    <div class="profile-stat-label">Documents</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value">{{ format_file_size(stats.total_size) }}</div>
+                    <div class="profile-stat-label">Storage</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-value">{{ stats.shared_count }}</div>
+                    <div class="profile-stat-label">Shared</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: left;">
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">ACCOUNT DETAILS</div>
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                        <span style="color:var(--text-secondary);">Aadhaar</span>
+                        <span>{{ user.aadhaar if user.aadhaar else '—' }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                        <span style="color:var(--text-secondary);">Phone</span>
+                        <span>{{ user.phone if user.phone else '—' }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                        <span style="color:var(--text-secondary);">Joined</span>
+                        <span>{{ user.created_at.strftime('%b %d, %Y') if user.created_at else '—' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Edit Form -->
+    <div class="panel">
+        <div class="panel-header">
+            <h3>✏️ Edit Profile</h3>
+        </div>
+        <form method="POST" action="{{ url_for('profile') }}" id="profileForm">
+            <div class="form-group">
+                <label for="profileName">Full Name</label>
+                <input type="text" id="profileName" name="name" class="form-input" value="{{ user.name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="profileEmail">Email Address</label>
+                <input type="email" id="profileEmail" class="form-input" value="{{ user.email }}" disabled style="opacity:0.5; cursor:not-allowed;">
+                <small class="text-muted" style="font-size:0.75rem;">Email cannot be changed</small>
+            </div>
+            <div class="form-group">
+                <label for="profileAadhaar">Aadhaar Number <span class="text-muted">(optional)</span></label>
+                <input type="text" id="profileAadhaar" name="aadhaar" class="form-input" value="{{ user.aadhaar or '' }}" placeholder="12-digit Aadhaar number" maxlength="12">
+            </div>
+            <div class="form-group">
+                <label for="profilePhone">Phone Number <span class="text-muted">(optional)</span></label>
+                <input type="tel" id="profilePhone" name="phone" class="form-input" value="{{ user.phone or '' }}" placeholder="+91 ..." maxlength="15">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="saveProfileBtn" style="margin-top:0.5rem;">
+                💾 Save Changes
+            </button>
+        </form>
+
+        {% if stats.categories %}
+        <div style="margin-top:2rem;">
+            <div class="panel-header">
+                <h3>📊 Documents by Category</h3>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                {% for cat in stats.categories %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
+                    <span style="font-size:0.85rem; font-weight:500;">{{ cat.category }}</span>
+                    <span style="font-size:0.8rem; color:var(--text-accent); font-weight:600;">{{ cat.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

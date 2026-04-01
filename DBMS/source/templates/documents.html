@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}DigiLocker — My Documents{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>📁 My Documents</h1>
+        <p>Upload, manage, and share your documents securely</p>
+    </div>
+</div>
+
+<!-- Upload Zone -->
+<form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
+    <div class="upload-zone" id="uploadZone">
+        <input type="file" name="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.doc,.docx,.xls,.xlsx,.txt,.csv,.ppt,.pptx">
+        <div class="upload-icon">☁️</div>
+        <h3 id="fileLabel">Drag & drop a file here or click to browse</h3>
+        <p>Supports PDF, Images, Docs, Sheets & more · Max 10 MB</p>
+    </div>
+    <div style="display:flex; gap:1rem; align-items:center; margin-bottom:2rem; flex-wrap:wrap;">
+        <div class="form-group" style="margin-bottom:0; min-width:180px;">
+            <select name="category" class="form-select" id="uploadCategory">
+                {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="uploadBtn">
+            📤 Upload
+        </button>
+    </div>
+</form>
+
+<!-- Toolbar: Search & Category Filters -->
+<div class="docs-toolbar">
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="docSearch" placeholder="Search documents..." value="{{ search_query }}">
+    </div>
+    <div class="category-filters">
+        <a href="{{ url_for('documents') }}" class="cat-chip {% if current_category == 'All' %}active{% endif %}">All</a>
+        {% for cat in categories %}
+        <a href="{{ url_for('documents', category=cat) }}" class="cat-chip {% if current_category == cat %}active{% endif %}">{{ cat }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Document Grid -->
+{% if documents %}
+<div class="docs-grid">
+    {% for doc in documents %}
+    <div class="doc-card" id="doc-{{ doc.doc_id }}">
+        <div class="doc-card-header">
+            <div class="doc-type-icon {% if doc.file_type in ['pdf'] %}pdf{% elif doc.file_type in ['png','jpg','jpeg','gif'] %}image{% elif doc.file_type in ['doc','docx'] %}doc{% elif doc.file_type in ['xls','xlsx','csv'] %}sheet{% else %}other{% endif %}">
+                {% if doc.file_type == 'pdf' %}📕
+                {% elif doc.file_type in ['png','jpg','jpeg','gif'] %}🖼️
+                {% elif doc.file_type in ['doc','docx'] %}📘
+                {% elif doc.file_type in ['xls','xlsx','csv'] %}📗
+                {% elif doc.file_type in ['ppt','pptx'] %}📙
+                {% elif doc.file_type == 'txt' %}📝
+                {% else %}📄{% endif %}
+            </div>
+            <div class="doc-card-title">
+                <h4 title="{{ doc.file_name }}">{{ doc.file_name }}</h4>
+                <span class="doc-category">{{ doc.category }}</span>
+            </div>
+        </div>
+        <div class="doc-card-details">
+            <div class="doc-detail">
+                <div class="doc-detail-label">Size</div>
+                <div class="doc-detail-value">{{ format_file_size(doc.file_size) }}</div>
+            </div>
+            <div class="doc-detail">
+                <div class="doc-detail-label">Type</div>
+                <div class="doc-detail-value">{{ doc.file_type | upper }}</div>
+            </div>
+            <div class="doc-detail">
+                <div class="doc-detail-label">Uploaded</div>
+                <div class="doc-detail-value">{{ doc.upload_date.strftime('%b %d') if doc.upload_date else 'N/A' }}</div>
+            </div>
+        </div>
+        <div class="doc-card-actions">
+            <a href="{{ url_for('preview', doc_id=doc.doc_id) }}" class="btn btn-ghost btn-sm" target="_blank" title="Preview">
+                👁️
+            </a>
+            <a href="{{ url_for('download', doc_id=doc.doc_id) }}" class="btn btn-ghost btn-sm" title="Download">
+                ⬇️
+            </a>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="shareDocument({{ doc.doc_id }})" title="Share">
+                🔗
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="confirmDelete({{ doc.doc_id }}, '{{ doc.file_name }}')" title="Delete" style="color:var(--accent-red);">
+                🗑️
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <h3>No documents found</h3>
+    <p>
+        {% if search_query %}
+            No results match "{{ search_query }}". Try a different search.
+        {% elif current_category != 'All' %}
+            No documents in the "{{ current_category }}" category yet.
+        {% else %}
+            Upload your first document using the area above!
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}DigiLocker — {{ 'Sign In' if mode == 'login' else 'Create Account' }}{% endblock %}
+
+{% block body %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="logo-icon">🔐</div>
+            <h1>DigiLocker</h1>
+            <p>Your secure digital document vault</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <a href="{{ url_for('login') }}" class="auth-tab {% if mode == 'login' %}active{% endif %}" id="tab-login">Sign In</a>
+            <a href="{{ url_for('register') }}" class="auth-tab {% if mode == 'register' %}active{% endif %}" id="tab-register">Create Account</a>
+        </div>
+
+        {% if mode == 'login' %}
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="loginBtn" style="margin-top: 0.5rem;">
+                Sign In →
+            </button>
+        </form>
+
+        {% else %}
+        <!-- Register Form -->
+        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Re-enter" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="aadhaar">Aadhaar Number <span class="text-muted">(optional)</span></label>
+                    <input type="text" id="aadhaar" name="aadhaar" class="form-input" placeholder="12 digits" maxlength="12">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone <span class="text-muted">(optional)</span></label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 ..." maxlength="15">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="registerBtn" style="margin-top: 0.5rem;">
+                Create Account →
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Flash container for auth page -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">
+        <span>{% if category == 'success' %}✓{% elif category == 'error' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
